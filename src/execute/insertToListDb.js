@@ -4,6 +4,7 @@ const MasterLocationTable = require('../model/master_location');
 const MasterSongTable = require('../model/master_song');
 const MasterExtensionTable = require('../model/master_extension');
 const path = require('path');
+const moment = require('moment');
 
 const execute = async() =>{
     try {
@@ -15,26 +16,36 @@ const execute = async() =>{
         const masterSatuDir = location.find(location => location.id_location == 1);
         const masterDuaDir = location.find(location => location.id_location == 2);
         const tampunganDir = location.find(location => location.id_location == 3);
+        const listFile = [];
 
-        const files = await fs.readdir(masterSatuDir.location);
+        const files = await fs.readdir(masterDuaDir.location);
 
         for(let i = 0; i<files.length; i++){
+            
+            if(files[i] == 'System Volume Information' || files[i] == '$RECYCLE.BIN'){
+                continue;
+            }
+            
             const [fileName, fileExtension] = files[i].split('.');
 
-            const fileFullPath = path.join(masterSatuDir.location, files[i]);
+            const fileFullPath = path.join(masterDuaDir.location, files[i]);
 
             const detailFile = await fs.stat(fileFullPath);
+            const formattedDate = moment(detailFile.mtime).format('YYYY-MM-DD HH:mm:ss');
 
             const insertData = {
                 id_file: fileName,
                 extention: fileExtension,
-                date_modified: detailFile.mtime,
+                date_modified: formattedDate,
                 size: detailFile.size,
-                location: '1',
+                location: '2',
             }
 
-            console.log(insertData)
+            listFile.push(insertData)
+            console.log(i)
         }
+        console.log('JUMLAH FILE '+listFile.length);
+        await MasterFileTable.bulkCreate(listFile);
     } catch (err) {
         console.log(`
         ------ERROR cekSatu-------
