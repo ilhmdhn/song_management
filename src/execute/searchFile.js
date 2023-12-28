@@ -13,13 +13,6 @@ const listFiles = async (directoryPath) => {
     const location = await MasterLocationTable.findAll({
       raw: true
     });
-
-    const copyProcess = await ConfigurationTable.findOne({
-      where:{
-        name: 'copy_process'
-      },
-      raw: true
-    });
     const masterSatuDir = location.find(location => location.id_location == 1);
     const masterDuaDir = location.find(location => location.id_location == 2);
     const tampunganDir = location.find(location => location.id_location == 3);
@@ -28,9 +21,18 @@ const listFiles = async (directoryPath) => {
     const files = await fs.readdir(directoryPath);
 
     for (let i = 0; i < files.length; i++) {
+
+      const copyProcess = await ConfigurationTable.findOne({
+        where:{
+          name: 'copy_process'
+        },
+        raw: true
+      });
+  
       if(!copyProcess){
         break;
       }
+      
       const fileFullPath = path.join(directoryPath, files[i]);
 
       // Skip temporary files
@@ -67,25 +69,33 @@ const listFiles = async (directoryPath) => {
 
             const checkMasterFile = await MasterFileTable.findOne({
                 where:{
-                    id_file: name,
-                    extention: extensionFile,
-                    date_modified: moment(detail.mtime).format('YYYY-MM-DD HH:mm:ss'),
-                    size: detail.size,
+                    id_file: name
+                    // ,
+                    // extention: extensionFile,
+                    // date_modified: moment(detail.mtime).format('YYYY-MM-DD HH:mm:ss'),
+                    // size: detail.size,
                 },
                 raw: true
             });
+
             if(!checkMasterFile){
                 console.log('BELUM KEISI\n'+ fileFullPath)
-                console.log(`
-                    id_file: ${name}
-                    extention: ${extensionFile}
-                    date_modified: ${moment(detail.mtime).format('YYYY-MM-DD HH:mm:ss')}
-                    size: ${detail.size}
-                `)
-                const destinationFullPath = path.join(masterSatuDir.location, files[i]);
+                const insertData = {
+                  id_file: name,
+                  extention: extensionFile,
+                  date_modified: moment(detail.mtime).format('YYYY-MM-DD HH:mm:ss'),
+                  size: detail.size,
+                  location: '2',
+              }
+                const destinationFullPath = path.join(masterDuaDir.location, files[i]);
                 console.log('MENYALIN '+fileFullPath);
                 console.log('TUJUAN '+destinationFullPath);
                 await fs.copyFile(fileFullPath, destinationFullPath);
+                console.log(`
+                INSERT TO DATABASE
+                ${JSON.stringify(insertData)}
+              `)
+              await MasterFileTable.create(insertData)
                 console.log('BERHASIL');                
             }
         }

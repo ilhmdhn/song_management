@@ -41,11 +41,19 @@ const execute = async() =>{
                 location: '2',
             }
 
-            listFile.push(insertData)
+            // listFile.push(insertData)
+            const isExist = await MasterFileTable.findOne({
+                where: insertData,
+                raw: true
+            })
+            if(!isExist){
+                console.log(`insert `+JSON.stringify(insertData))
+                await MasterFileTable.create(insertData)
+            }
             console.log(i)
         }
         console.log('JUMLAH FILE '+listFile.length);
-        await MasterFileTable.bulkCreate(listFile);
+        // await MasterFileTable.bulkCreate(listFile);
     } catch (err) {
         console.log(`
         ------ERROR cekSatu-------
