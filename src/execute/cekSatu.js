@@ -14,6 +14,7 @@ const execute = async() =>{
         const masterSatuDir = location.find(location => location.id_location == 1);
         const masterDuaDir = location.find(location => location.id_location == 2);
         const tampunganDir = location.find(location => location.id_location == 3);
+
         const files = await fs.readdir(masterDuaDir.location);
         const tampunganList = await fs.readdir(tampunganDir.location);
 

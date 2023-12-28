@@ -3,6 +3,7 @@ const path = require('path');
 const MasterLocationTable = require('../model/master_location');
 const MasterSongTable = require('../model/master_song');
 const MasterFileTable = require('../model/master_file');
+const ConfigurationTable = require('../model/configuration');
 const moment = require('moment')
 
 const pathDirektori = '\\\\192.168.1.10\\hddext';
@@ -13,6 +14,12 @@ const listFiles = async (directoryPath) => {
       raw: true
     });
 
+    const copyProcess = await ConfigurationTable.findOne({
+      where:{
+        name: 'copy_process'
+      },
+      raw: true
+    });
     const masterSatuDir = location.find(location => location.id_location == 1);
     const masterDuaDir = location.find(location => location.id_location == 2);
     const tampunganDir = location.find(location => location.id_location == 3);
@@ -21,6 +28,9 @@ const listFiles = async (directoryPath) => {
     const files = await fs.readdir(directoryPath);
 
     for (let i = 0; i < files.length; i++) {
+      if(!copyProcess){
+        break;
+      }
       const fileFullPath = path.join(directoryPath, files[i]);
 
       // Skip temporary files
