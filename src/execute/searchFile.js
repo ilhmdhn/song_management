@@ -42,10 +42,10 @@ const listFiles = async (directoryPath) => {
       }
 
       // Skip certain directories and files
-      if (['System Volume Information', '$RECYCLE.BIN', 'autorun.inf'].includes(files[i])) {
-        console.log(`SKIP ${files[i]}`);
-        continue;
-      }
+      // if (['System Volume Information', '$RECYCLE.BIN', 'autorun.inf'].includes(files[i])) {
+      //   console.log(`SKIP ${files[i]}`);
+      //   continue;
+      // }
 
       const detail = await fs.stat(fileFullPath);
 
@@ -85,9 +85,9 @@ const listFiles = async (directoryPath) => {
                   extention: extensionFile,
                   date_modified: moment(detail.mtime).format('YYYY-MM-DD HH:mm:ss'),
                   size: detail.size,
-                  location: '2',
+                  location: '1',
               }
-                const destinationFullPath = path.join(masterDuaDir.location, files[i]);
+                const destinationFullPath = path.join(masterSatuDir.location, files[i]);
                 console.log('MENYALIN '+fileFullPath);
                 console.log('TUJUAN '+destinationFullPath);
                 await fs.copyFile(fileFullPath, destinationFullPath);
